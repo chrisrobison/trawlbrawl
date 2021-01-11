@@ -1,0 +1,199 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+}
+
+header {
+    background-color: #999;
+    color: #eee;
+    height: 5vh;
+}
+
+main {
+    background-color: #333;
+    color: #ddd;
+    height: 90vh;
+    text-align: center;
+}
+
+footer {
+    background-color: #666;
+    color: #eee;
+    height: 5vh;
+}
+
+#board {
+    margin: 1rem auto;
+    display: inline-block;
+    position: relative;
+
+}
+
+.row {
+    white-space: nowrap;
+}
+
+.item:hover, .cell:hover {
+    background-color:#aef;
+    top: -3px;
+    box-shadow: 2px 3px 3px #0009;
+    transform: scale(1.2);
+    z-index:9999;
+}
+.selected.item:hover, .selected.cell:hover {
+    background-color:#ff6;
+} 
+#board div.box {
+    background-image: linear-gradient(-45deg, #4facfe 0%, #00f2fe 100%);
+    /* background-image: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%); */
+    height: 65px;
+    width: 65px;
+    display: inline-block;
+    float: left;
+}
+
+.cell {
+    width: 65px;
+    height: 65px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    display: inline-block;
+    transition: top 300ms, left 300ms, box-shadow 250ms, transform 250ms;
+
+}
+
+.item {
+    width: 65px;
+    height: 65px;
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    display: inline-block;
+    transition: top 300ms, left 300ms, box-shadow 250ms, transform 250ms;
+    border-top: 1px solid #000;
+    border-left: 1px solid #000;
+    
+}
+
+div.selected {
+    background-color:#ff0;
+}
+
+.bobber {
+    background-image: url("img/bobber.png");
+}
+
+.fish {
+    background-image: url("img/fish.png");
+}
+
+.hook {
+    background-image: url("img/hook.png");
+}
+
+.net {
+    background-image: url("img/net.png");
+}
+
+.pole {
+    background-image: url("img/pole.png");
+}
+
+.trap {
+    background-image: url("img/trap.png");
+}
+
+.worm {
+    background-image: url("img/worm.png");
+}
+
+.blank {
+    background-color: #ffff00;
+}
+
+.explosion {
+    position: absolute;
+    height: 300px;
+    width: 300px;
+    top:0px;
+    left:0px;
+    pointer-events: none;
+}
+
+.explosion .particle {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+
+}
+
+.explode {
+    position:absolute;
+    animation: shrink 250ms linear forwards;
+}
+@keyframes shrink {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0);
+    }
+}
+.explosion .bs0 {
+    box-shadow: .5em .5em .5em #fffa, -.5em -.5em .5em #fffa, -.5em 0px .5em #fffa, 0px -.5em .5em #fffa;
+}
+
+.explosion .bs1 {
+    box-shadow: .5em .5em .5em #fcca, -.5em -.5em .5em #fccc, -.5em 0px .5em #fccc, 0px -.5em .5em #fccc;
+}
+
+.explosion .bs2 {
+    box-shadow: .5em .5em .5em #ff0a, -.5em -.5em .5em #ff09, -.5em 0px .5em #ff09, 0px -.5em .5em #ff09;
+}
+
+.explosion .spin0 {
+    animation: spinner0 1000ms linear reverse forwards;
+    box-shadow: 0px 0px 0px #fff0, 0px 0px 0px #fff0, 0px 0px 0px #fff0, 0px 0px 0px #fff0;
+}
+
+.explosion .spin1 {
+    animation: spinner1 1000ms linear reverse forwards;
+    box-shadow: 0px 0px 0px #fff0, 0px 0px 0px #fff0, 0px 0px 0px #fff0, 0px 0px 0px #fff0;
+}
+
+@keyframes spinner0 {
+    0% {
+        transform: rotate3d(1, -1, 1, 1440deg);
+        opacity: 0;
+        height: 0px;
+        width: 0px;
+    }
+
+    100% {
+        transform: rotate3d(1, -1, 1, -1440deg);
+        top: 50%;
+        left: 50%;
+        opacity: 1;
+    }
+}
+
+@keyframes spinner1 {
+    0% {
+        transform: rotate3d(-1, 1, -1, -2880deg);
+        opacity: 0;
+        height: 0px;
+        width: 0px;
+        box-shadow: 2em 2em 2em #fffa, -2em -2em 2em #fffa, -2em 0px 2em #fffa, 0px -2em 2em #fffa;
+    }
+
+    100% {
+        transform: rotate3d(-1, 1, -1, 2880deg);
+        top: 50%;
+        left: 50%;
+        opacity: 1;
+        box-shadow: 0px 0px 0px #fff0, 0px 0px 0px #fff0, 0px 0px 0px #fff0, 0px 0px 0px #fff0;
+    }
+}
+
+

@@ -108,6 +108,57 @@ div.selected {
     background-image: url("img/worm.png");
 }
 
+.attack {
+    display:inline-block;
+    width:40%;
+    border-radius: 2em;
+    border:3px ridge #ccc;
+    background-color:#09f;
+    margin-right:.6em;
+}
+
+.attackVal {
+    font-family: "Liberation Mono", "Lucida Console", sans-serif;
+    border-radius:2rem;
+    font-size:1.3em;
+    color: #fff;
+    background-color:#900;
+    border: 1px solid #fff;
+    display:inline-block;
+    width:1.2em;
+    height:1.2em;
+    position:relative;
+    left:1em;
+    top:-.5em;
+}
+
+.attackReq {
+    width:3rem;
+    height:4rem;
+    background-size: contain;
+    background-repeat:no-repeat;
+    display:inline-block;
+}
+
+.attackIcon {
+    width: 65px;
+    height:65px;
+    float:left;
+    margin: .7em;
+    background-color:#0cf;
+    border-radius:4em;
+    padding:4px;
+    box-shadow: 3px 3px 3px #fffa, -3px -3px 3px #fffa, -3px 3px 3px #fffa, 3px -3px 3px #fffa;
+}
+
+.attack h2 {
+    margin:0;
+    padding:0;
+    margin-bottom:6px;
+    font-family: "Helvetica Neue","Arial",sans-serif;
+    text-shadow: 2px 2px 2px #000a;
+    text-transform: uppercase;
+}
 .blank {
     background-color: #ffff00;
 }
@@ -196,4 +247,6 @@ div.selected {
     }
 }
 
-
+.complete { 
+    background-color:#0a0;
+}

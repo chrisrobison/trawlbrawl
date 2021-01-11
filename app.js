@@ -39,14 +39,68 @@
             queue: [],
             particles: [],
             clearItems: [],
-            explosions: []
+            explosions: [],
+            inventory: {
+                bobber:0,
+                fish:0,
+                hook:0,
+                net:0,
+                pole:0,
+                trap:0,
+                worm:0
+            }
         },
         config: {
             rows: 9,
             cols: 9,
             cellwidth: 65,
             cellheight: 65,
-            items: ["bobber", "fish", "hook", "net", "pole", "trap", "worm"]
+            items: ["bobber", "fish", "hook", "net", "pole", "trap", "worm"],
+            attacks: [
+                {
+                    id: "catch",
+                    name: "Fish Catch",
+                    required: {
+                        trap: 5,
+                        bobber: 4,
+                        hook: 7
+                    },
+                    icon: 'img/fish+.png'
+                },
+                {
+                    id: "attack",
+                    name: "Attack",
+                    required: {
+                        bobber: 7,
+                        hook: 5,
+                        net: 6
+                    },
+                    icon: 'img/catfish.png'
+                },
+
+                 {
+                     id: "snatch",
+                    name: "Snatch",
+                    required: {
+                        trap: 9,
+                        net: 12,
+                        pole: 10
+                    },
+                    icon: 'img/burglefish.png'
+                },
+                {
+                    id: "net",
+                    name: "Fishing Net ",
+                    required: {
+                        bobber: 12,
+                        pole: 10,
+                        worm: 8
+                    },
+                    icon: 'img/fishingnet.png'
+                },
+
+                
+            ]
         },
         drag: function(e) {
             let obj = app.state.dragging;
@@ -134,13 +188,42 @@
                 for (let col = 0; col < app.config.cols; col++) {
                     let id = `r${row}c${col}`;
 
-
                     out += `<div id='box_${id}' class='box'><span id='${id}' class='cell'></span></div>`;
 
                 }
                 out += "</div>";
             }
+
+            for (let i=0; i<app.config.attacks.length; i++) {
+                let attack = app.config.attacks[i];
+                
+                out += "<div class='attack'><img src='" + attack.icon + "' class='attackIcon'><h2>" +attack.name+"</h2>";
+                for (const [key, val] of Object.entries(attack.required)) {
+                    out += "<span class='attackReq " + key + "' id='"+ attack.id + "_" + key + "'><span class='attackVal'>" + val + "</span></span>";
+                }
+                out += "</div>";
+            }
             $("#board").innerHTML = out;
+        },
+        updateInventory: function() {
+            app.config.items.forEach(function(item) {
+                for (let i=0; i<app.config.attacks.length; i++) {
+                    let attack = app.config.attacks[i];
+                    
+                    for (const [key, val] of Object.entries(attack.required)) {
+                        let newval = val - app.state.inventory[key];
+                        let pid = attack.id + '_' + key;
+                        if (newval <= 0) {
+                            $(`#${attack.id}_${key} .attackVal`).classList.add('complete');
+                            newval = '√';
+                        }
+
+                        console.log("updating " + pid + " with " + newval + " (was " + val + ")");
+
+                        $(`#${attack.id}_${key} .attackVal`).innerHTML = newval;
+                    }
+                }
+            });
         },
         genboard: function() {
             let out = "";
@@ -192,6 +275,7 @@
                 }, 500);
                 console.log("matched");
                 console.dir(matches);
+                app.updateInventory();
             }
             return matches;
         },
@@ -287,6 +371,7 @@
                 let cells = matches[i];
                 for (let j = 0; j < cells.length; j++) {
                     let cell = cells[j];
+                    app.state.inventory[app.state.board[cell.row][cell.col]]++;
                     app.state.board[cell.row][cell.col] = "";
                     let el = $(`#item_r${cell.row}c${cell.col}`);
                     //                let el2 = el.cloneNode(true);

@@ -1,4 +1,5 @@
 body {
+    font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
     margin: 0;
     padding: 0;
     font-size: 14px;
@@ -10,11 +11,19 @@ header {
     height: 5vh;
 }
 
+nav {
+    display: inline-block;
+    width: 20em;
+    float: left;
+}
+
 main {
     background-color: #333;
     color: #ddd;
     height: 90vh;
+    width: 100%;
     text-align: center;
+    display: inline-block;
 }
 
 footer {
@@ -23,27 +32,79 @@ footer {
     height: 5vh;
 }
 
+section {
+    max-width: 70rem;
+    position: relative;
+    margin: 0px auto;
+}
+
+#inventory {
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+    margin-top: 3.5rem;
+}
+
+.invItem {
+    position: absolute;
+    background-clip: content-box;
+    width: 65px;
+    height: 65px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    padding-top: 65px;
+    box-sizing: content-box;
+    top: 0.3rem;
+    left: 0.4rem;
+}
+
+.inventory span {
+    display: inline-block;
+    background-color: #090;
+    border-radius: 50%;
+    font-size: 1.3em;
+    font-family: "Liberation Mono", "Lucida Console", sans-serif;
+    border: 1px solid #fff;
+    width: 1.3rem;
+    height: 1.3rem;
+    position: relative;
+    left: 1rem;
+}
+
+.inventory {
+    position: relative;
+    white-space: nowrap;
+    width: 5rem;
+    height: 5rem;
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: inline-block;
+}
+
 #board {
     margin: 1rem auto;
     display: inline-block;
     position: relative;
-
+    float: left;
 }
 
 .row {
     white-space: nowrap;
 }
 
-.item:hover, .cell:hover {
-    background-color:#aef;
+.item:hover,
+.cell:hover {
+    background-color: #aef;
     top: -3px;
     box-shadow: 2px 3px 3px #0009;
     transform: scale(1.2);
-    z-index:9999;
+    z-index: 9999;
 }
-.selected.item:hover, .selected.cell:hover {
-    background-color:#ff6;
-} 
+
+.selected.item:hover,
+.selected.cell:hover {
+    background-color: #ff6;
+}
+
 #board div.box {
     background-image: linear-gradient(-45deg, #4facfe 0%, #00f2fe 100%);
     /* background-image: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%); */
@@ -73,11 +134,39 @@ footer {
     transition: top 300ms, left 300ms, box-shadow 250ms, transform 250ms;
     border-top: 1px solid #000;
     border-left: 1px solid #000;
-    
+
 }
 
 div.selected {
-    background-color:#ff0;
+    background-color: #ff0;
+}
+
+.blank_bobber {
+    background-image: url("img/bobber-blank.png");
+}
+
+.blank_fish {
+    background-image: url("img/fish-blank.png");
+}
+
+.blank_hook {
+    background-image: url("img/hook-blank.png");
+}
+
+.blank_net {
+    background-image: url("img/net-blank.png");
+}
+
+.blank_pole {
+    background-image: url("img/pole-blank.png");
+}
+
+.blank_trap {
+    background-image: url("img/trap-blank.png");
+}
+
+.blank_worm {
+    background-image: url("img/worm-blank.png");
 }
 
 .bobber {
@@ -109,56 +198,169 @@ div.selected {
 }
 
 .attack {
-    display:inline-block;
-    width:40%;
     border-radius: 2em;
-    border:3px ridge #ccc;
-    background-color:#09f;
-    margin-right:.6em;
+    border: 3px ridge #ccc;
+    background-color: #3c70e2;
+    margin-right: .5rem;
+    margin-left: 1.3rem;
+    margin-bottom: .5rem;
+    box-sizing: content-box;
+    width: 15rem;
+    position: relative;
+}
+
+#opponentScore {
+    font-family: "Liberation Mono", "Lucida Console", sans-serif;
+    font-size: 26px;
+    text-shadow: 1px 1px 1px #0009, -1px -1px 1px #0009, 1px -1px 1px #0009, -1px 1px 1px #0009;
+    color: #fff;
+    font-weight: bold;
+    display: inline-block;
+    text-align: center;
+    z-index: 1001;
+    position: relative;
+    margin-left: 3rem;
+}
+
+#fishcount {
+    font-family: "Liberation Mono", "Lucida Console", sans-serif;
+    font-size: 26px;
+    text-shadow: 1px 1px 1px #0009, -1px -1px 1px #0009, 1px -1px 1px #0009, -1px 1px 1px #0009;
+    color: #fff;
+    font-weight: bold;
+    display: inline-block;
+    text-align: center;
+    z-index: 1001;
+    position: relative;
+}
+
+aside {
+    float: left;
+    width: 15rem;
+    height: 20rem;
+}
+
+#opponent {
+    position: absolute;
+    height: 32px;
+    border-radius: 1em;
+    background-color: #222;
+    overflow: visible;
+    width: 12rem;
+    margin-top: 1rem;
+    margin-left: 1rem;
+}
+
+#score {
+    position: absolute;
+    height: 32px;
+    border-radius: 1em;
+    background-color: #222;
+    overflow: visible;
+    width: 14rem;
+    margin-top: 1rem;
+    margin-left: 2rem;
+}
+
+.anifish {
+    width: 4rem;
+    height: 4rem;
+    position: relative;
+    left: -1.6rem;
+    top: -1rem;
+    float: left;
+    filter: drop-shadow(2px 2px 2px #0009);
+    z-index: 1001;
+}
+
+.evilfish {
+    width: 4rem;
+    height: 4rem;
+    position: relative;
+    left: 1rem;
+    top: -1rem;
+    float: right;
+    filter: drop-shadow(2px 2px 2px #0009);
+    transform: scaleX(-1);
+    z-index: 1001;
+}
+
+
+#opponentProgress {
+    position: absolute;
+    background-color: #f30;
+    width: 0px;
+    border-radius: 2rem;
+    height: 2rem;
+    z-index: 1;
+    left: 0px;
+}
+
+#fishProgress {
+    position: absolute;
+    background-color: #ca0;
+    width: 0px;
+    border-radius: 2rem;
+    height: 2rem;
+    z-index: 1;
+    left: 2rem;
 }
 
 .attackVal {
-    font-family: "Liberation Mono", "Lucida Console", sans-serif;
-    border-radius:2rem;
-    font-size:1.3em;
+    font-family: "Liberation Mono", "Lucida Console", monospace;
+    border-radius: 2rem;
+    font-size: 1.3em;
     color: #fff;
-    background-color:#900;
+    background-color: #900;
     border: 1px solid #fff;
-    display:inline-block;
-    width:1.2em;
-    height:1.2em;
-    position:relative;
-    left:1em;
-    top:-.5em;
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    position: relative;
+    left: 1em;
+    top: -.5em;
 }
 
 .attackReq {
-    width:3rem;
-    height:4rem;
+    width: 3rem;
+    height: 3rem;
     background-size: contain;
-    background-repeat:no-repeat;
-    display:inline-block;
+    background-repeat: no-repeat;
+    display: inline-block;
 }
 
 .attackIcon {
-    width: 65px;
-    height:65px;
-    float:left;
+    width: 3rem;
+    height: 3rem;
+    float: left;
     margin: .7em;
-    background-color:#0cf;
-    border-radius:4em;
-    padding:4px;
-    box-shadow: 3px 3px 3px #fffa, -3px -3px 3px #fffa, -3px 3px 3px #fffa, 3px -3px 3px #fffa;
+    padding: 4px;
+    transform: scale(1.5);
+}
+
+.attack::before {
+    display: inline-block;
+    content: "";
+    height: 4rem;
+    width: 4rem;
+    position: absolute;
+    top: 0.5rem;
+    left: 0.3rem;
+    color: #ff0;
+    float: left;
+    background-color: #ff0;
+    border-radius: 50%;
 }
 
 .attack h2 {
-    margin:0;
-    padding:0;
-    margin-bottom:6px;
-    font-family: "Helvetica Neue","Arial",sans-serif;
+    margin: 0;
+    padding: 0;
+    margin-bottom: 6px;
+    font-family: "Helvetica Neue", "Arial", sans-serif;
     text-shadow: 2px 2px 2px #000a;
     text-transform: uppercase;
 }
+
 .blank {
     background-color: #ffff00;
 }
@@ -167,8 +369,8 @@ div.selected {
     position: absolute;
     height: 300px;
     width: 300px;
-    top:0px;
-    left:0px;
+    top: 0px;
+    left: 0px;
     pointer-events: none;
 }
 
@@ -180,17 +382,20 @@ div.selected {
 }
 
 .explode {
-    position:absolute;
+    position: absolute;
     animation: shrink 250ms linear forwards;
 }
+
 @keyframes shrink {
     0% {
         transform: scale(1);
     }
+
     100% {
         transform: scale(0);
     }
 }
+
 .explosion .bs0 {
     box-shadow: .5em .5em .5em #fffa, -.5em -.5em .5em #fffa, -.5em 0px .5em #fffa, 0px -.5em .5em #fffa;
 }
@@ -247,6 +452,6 @@ div.selected {
     }
 }
 
-.complete { 
-    background-color:#0a0;
+.complete {
+    background-color: #0a0;
 }

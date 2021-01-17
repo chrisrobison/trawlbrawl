@@ -137,8 +137,176 @@ section {
 
 }
 
-div.selected {
+.selected {
     background-color: #ff0;
+}
+
+.moveto {
+    background-color: #f0f;
+}
+
+@keyframes explosion {
+    10% {
+        content: "1";
+        color: white;
+        font-size: 20px;
+    }
+
+    20% {
+        content: "2";
+        color: white;
+        font-size: 40px;
+    }
+
+    30% {
+        content: "3";
+        color: white;
+        font-size: 60px;
+    }
+
+    40% {
+        content: "4";
+        color: white;
+        font-size: 80px;
+    }
+
+    50% {
+        content: "5";
+        color: white;
+        font-size: 100px;
+    }
+
+    60% {
+        content: "6";
+        color: white;
+        font-size: 120px;
+    }
+
+    70% {
+        content: "7";
+        color: white;
+        font-size: 140px;
+    }
+
+    80% {
+        content: "8";
+        color: white;
+        font-size: 160px;
+    }
+
+    90% {
+        content: "9";
+        color: white;
+        font-size: 180px;
+    }
+
+    100% {
+        content: "10";
+        color: white;
+        font-size: 200px;
+    }
+}
+
+.bomb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bomb:after {
+    font-size: 300px;
+    content: "BOOM!";
+    display: block;
+    color: red;
+    text-align: center;
+    animation: explosion 7s linear infinite reverse;
+    transition: color 0.1s ease;
+}
+
+#countdown:after {
+    color: #fff;
+    content: "☠";
+    font-size: 72px;
+    font-family: "Roboto Mono", monospace;
+    animation: counter 10s linear 1 3s;
+    position: relative;
+    z-index: 2001;
+}
+
+@keyframes counter {
+    0% {
+        content: "10";
+        color: #fff;
+    }
+
+    10% {
+        content: "9";
+
+        color: #fff;
+    }
+
+    20% {
+        content: "8";
+        color: #fff;
+    }
+
+    30% {
+        content: "7";
+        color: #fff;
+    }
+
+    40% {
+        content: "6";
+        color: #fff;
+    }
+
+    50% {
+        content: "5";
+
+        color: #fff;
+    }
+
+    60% {
+        content: "4";
+        color: #fff;
+    }
+
+    70% {
+        content: "3";
+        color: #fff;
+    }
+
+    80% {
+        content: "2";
+        color: #fff;
+    }
+
+    90% {
+        content: "1";
+        color: #fff;
+    }
+
+    100% {
+        content: "☠";
+        color: #fff;
+    }
+
+}
+
+#countdown {
+    position: absolute;
+    font-size: 72px;
+    line-height: 1.6em;
+    font-family: "Roboto Mono", monospace;
+    border-radius: 100px;
+    background-color: #000;
+    border: 15px solid #eee;
+    right: 4rem;
+    color: #0e0;
+    width: 150px;
+    height: 150px;
+    box-sizing: border-box;
+    margin-top: 1em;
 }
 
 .blank_bobber {
@@ -219,7 +387,7 @@ div.selected {
     text-align: center;
     z-index: 1001;
     position: relative;
-    margin-left: 3rem;
+    margin-left: 2rem;
 }
 
 #fishcount {
@@ -454,4 +622,17 @@ aside {
 
 .complete {
     background-color: #0a0;
+}
+
+.playerUp {
+    font-size: 24px;
+    margin-top: 10rem;
+}
+.attack {
+    box-shadow: 3px 3px 3px #000a;
+}
+.attack:active {
+    border-style: inset;
+    top: 3px;
+    background-color: #5aa5e4;
 }

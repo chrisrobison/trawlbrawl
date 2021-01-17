@@ -4,7 +4,6 @@
             app.state.loaded = true;
             app.buildboard();
             app.genboard();
-
             $("#board").addEventListener("mousedown", function(e) {
                 //$("#board").addEventListener("mousemove", app.drag);
                 app.handleMouseDown(e);
@@ -26,7 +25,21 @@
                 $("#board").removeEventListener("mousemove", app.drag);
                 app.handleMouseUp(e);
             });
-        },
+            $("#attacks").addEventListener("click", function(e) {
+                console.log("ATTACK!!!");
+                console.dir(e);
+
+                let attackEl = e.target;
+
+                while (!attackEl.classList.contains('attack')) {
+                    attackEl = attackEl.parentElement;
+                }
+                let attack = attackEl.id;
+                console.log("Attacking with " + attack);
+
+                app.attack(attack);
+            });
+         },
         state: {
             loaded: false,
             selected: '',
@@ -135,7 +148,7 @@
                     });
                     //setTimeout(function() { app.checkMatches(); }, 500);
                     setTimeout(function() {
-                        if (!app.checkMatches().length) {
+                        if (!app.checkMatches(0, 0).length) {
                             console.log("No matches.  swapping back");
                             app.swapSpots({
                                 x: mx,
@@ -150,6 +163,8 @@
                             console.log("Found matches. leaving alone");
                         }
                     }, 300);
+                    app.switchPlayer();
+                    setTimeout(function() { app.autoMove(); }, 2000);
                 } else {
                     let sel = $(".selected");
                     if (sel) sel.classList.remove("selected");
@@ -214,16 +229,18 @@
                 }
             });
             out += "</div>";
-
+            
+            out += "<div id='attacks'>";
             for (let i = 0; i < app.config.attacks.length; i++) {
                 let attack = app.config.attacks[i];
 
-                out += "<div class='attack'><img src='" + attack.icon + "' class='attackIcon'><h2>" + attack.name + "</h2>";
+                out += "<div id='" + attack.id + "' class='attack'><img src='" + attack.icon + "' class='attackIcon'><h2>" + attack.name + "</h2>";
                 for (const [key, val] of Object.entries(attack.required)) {
                     out += "<div class='attackReq " + key + "' id='" + attack.id + "_" + key + "'><span class='attackVal'>" + val + "</span></div>";
                 }
                 out += "</div>";
             }
+            out += "</div>";
 
             $("nav").innerHTML = out;
 
@@ -249,20 +266,25 @@
             out += "<span id='opponentScore'>0/0</span>";
             out += "</div>";
             
+            //out += '<div class="playerUp"><div class="continue">PLAYER <span id="playerUp">1</span></p></div><div class="wrapper"><div class="countdown"></div></div>';
+
+            out += "<div class='playerUp'>PLAYER <span id='playerUp'>1</span> UP</div><div id='countdown'></div>";
+
             $("aside").innerHTML = out;
 
         },
         updateScoreboard: function(player=0) {
-            $("#opponentScore").innerHTMNL = app.state.inventory[player^1].fish + ' / ' + app.config.goal;
-            $("#fishcount").innerHTML = app.state.inventory[player].fish + ' / ' + app.config.goal;
-            $("#fishProgress").style.width = Math.floor((app.state.inventory[player].fish / app.config.goal) * 100) + '%';
+            $("#opponentScore").innerHTML = app.state.inventory[1].fish + ' / ' + app.config.goal;
+            $("#fishcount").innerHTML = app.state.inventory[0].fish + ' / ' + app.config.goal;
+            $("#fishProgress").style.width = Math.floor((app.state.inventory[0].fish / app.config.goal) * 100) + '%';
+            $("#opponentProgress").style.width = Math.floor((app.state.inventory[1].fish / app.config.goal) * 100) + '%';
 
             app.config.items.forEach((item) => {
                 if (item !== 'fish') {
-                    let val = (app.state.inventory[player][item] >= 15) ? "max" : app.state.inventory[player][item];
+                    let val = (app.state.inventory[0][item] >= 15) ? "max" : app.state.inventory[0][item];
 
                     $(`#inv_${item}`).innerHTML = val;
-                    let percent = app.state.inventory[player][item] / 15;
+                    let percent = app.state.inventory[0][item] / 15;
                     $("#inv_img_" + item).style.paddingTop = 65 - (65 * percent) + "px";
                 }
             });
@@ -332,17 +354,40 @@
             const coord = {};
 console.dir(moves);
             if (moves.length) {
-                let move = moves[app.rand(0, moves.length)];
+                let move;
+
+                // Set priority to choose fish first (and then poles)
+                // otherwise, randomly pick 
+                // TODO: choose based on inventory needs
+                moves.forEach(function(item) {
+                    if (item.item == 'fish') {
+                        move = item;
+                    } else if (item.item == 'pole') {
+                        move = item;
+                    }
+                });
+
+                if (!move) move = moves[app.rand(0, moves.length)];
+                
                 coord.from = move.from.split(/\D/);
                 coord.from.shift();
 
                 coord.to = move.to.split(/\D/);
                 coord.to.shift();
+                
+                $("#"+move.from).classList.add('selected');
+                $("#"+move.to).classList.add('moveto');
 
                 app.swapSpots({x: coord.from[1], y: coord.from[0]}, {x: coord.to[1], y: coord.to[0]});
 
-                setTimeout(function() { app.checkMatches(0, app.state.currentPlayer, false); app.state.currentPlayer ^= 1; }, 500);
+                setTimeout(function() { app.checkMatches(0, 1, false); $(".moveto").classList.remove('moveto'); }, 500);
+                
+                app.switchPlayer();
             }
+        },
+        switchPlayer: function() {
+            app.state.currentPlayer ^= 1;
+            $("#playerUp").innerHTML = app.state.currentPlayer + 1;
         },
         findMoves: function() {
            // check each row looking for patterns of either XX-X/X-XX or X-X and check rows before/after for matching item
@@ -352,39 +397,64 @@ console.dir(moves);
                 for (let c=0; c< app.config.cols; c++) {
                     let cell = app.state.board[r][c];
                     if ((app.state.board[r][c + 1] == cell) && (app.state.board[r][c+3] == cell)) {
-                        moves.push({ from: `r${r}c${c+3}`, to: `r${r}c${c+2}` });
+                        moves.push({ item: cell, from: `r${r}c${c+3}`, to: `r${r}c${c+2}` });
                     } else if ((c < app.config.cols - 4) && (app.state.board[r][c + 2] == cell) && (app.state.board[r][c+3] == cell)) {
-                        moves.push({ from: `r${r}c${c}`, to: `r${r}c${c+1}` });
+                        moves.push({ item: cell, from: `r${r}c${c}`, to: `r${r}c${c+1}` });
                     } else if ((c < app.config.cols - 3) && (r < app.config.rows - 2) && (app.state.board[r][c + 2] == cell) && (app.state.board[r+1][c+1] == cell)) {
-                        moves.push({ from: `r${r+1}c${c+1}`, to: `r${r}c${c+1}` });
+                        moves.push({ item: cell, from: `r${r+1}c${c+1}`, to: `r${r}c${c+1}` });
                     } else if ((r > 0) && (app.state.board[r][c + 2] == cell) && (app.state.board[r-1][c+1] == cell)) {
-                        moves.push({ from: `r${r-1}c${c+1}`, to: `r${r}c${c+1}` });
+                        moves.push({ item: cell, from: `r${r-1}c${c+1}`, to: `r${r}c${c+1}` });
                     } else if ((r > 0) && (app.state.board[r][c + 1] == cell) && (app.state.board[r-1][c+2] == cell)) {
-                        moves.push({ from: `r${r-1}c${c+2}`, to: `r${r}c${c+2}` });
+                        moves.push({ item: cell, from: `r${r-1}c${c+2}`, to: `r${r}c${c+2}` });
                     } else if ((r < app.config.rows - 2) && (app.state.board[r][c + 1] == cell) && (app.state.board[r+1][c+2] == cell)) {
-                        moves.push({ from: `r${r+1}c${c+2}`, to: `r${r}c${c+2}` });
+                        moves.push({ item: cell, from: `r${r+1}c${c+2}`, to: `r${r}c${c+2}` });
                     }
                 }
             }
             
+            /*
+                  X - | - X | X - | - X | X - | - X
+                  - X | X - | - X | X - | X - | - X
+                  - X | X - | X - | - X | - X | X -
+
+                  X - | - X | X - | - X
+                  - X | X - | X - | - X
+                  X - | - X | - X | X -
+                  X - | - X | X - | - X
+            */
             for (let c=0; c<app.config.cols; c++) {
                 for (let r=0; r< app.config.rows; r++) {
                     let cell = app.state.board[r][c];
                     if ((r < app.config.rows - 4) && (app.state.board[r + 1][c] == cell) && (app.state.board[r + 3][c] == cell)) {
-                        moves.push({ from: `r${r+3}c${c}`, to: `r${r+2}c${c}` });
+                        moves.push({ item: cell, from: `r${r+3}c${c}`, to: `r${r+2}c${c}` });
                     } else if ((r < app.config.rows - 4) && (app.state.board[r + 2][c] == cell) && (app.state.board[r + 3][c] == cell)) {
-                        moves.push({ from: `r${r}c${c}`, to: `r${r+1}c${c}` });
-                    } else if ((r < app.config.rows - 3) && (c < app.config.cols - 2) && (app.state.board[r + 2][c] == cell) && (app.state.board[r+1][c+1] == cell)) {
-                        moves.push({ from: `r${r+1}c${c+1}`, to: `r${r+1}c${c}` });
-                    } else if ((r < app.config.rows - 3) && (c > 0) && (app.state.board[r + 2][c] == cell) && (app.state.board[r+1][c-1] == cell)) {
-                        moves.push({ from: `r${r+1}c${c-1}`, to: `r${r+1}c${c}` });
-                    } else if ((r < app.config.rows - 3) && (c > 0) && (app.state.board[r + 2][c - 1] == cell) && (app.state.board[r+1][c] == cell)) {
-                        moves.push({ from: `r${r+2}c${c-1}`, to: `r${r+2}c${c}` });
+                        moves.push({ item: cell, from: `r${r}c${c}`, to: `r${r+1}c${c}` });
+                    } else if ((r < app.config.rows - 3) && (app.state.board[r + 2][c] == cell)) {
+                        if ((c > 0) && (app.state.board[r + 1][c - 1] == cell)) {
+                            moves.push({ item: cell, from: `r${r + 1}c${c - 1}`, to: `r${r + 1}c${c}` });
+                        } else if ((c < app.config.cols - 2) && (app.state.board[r + 1][c + 1] == cell)) {
+                            moves.push({ item: cell, from: `r${r + 1}c${c + 1}`, to: `r${r + 1}c${c}` });
+                        }
+                    } else if ((r < app.config.rows - 3) && (c > 0) && (app.state.board[r + 1][c] == cell)) {
+                        if ((c > 0) && (app.state.board[r + 2][c - 1] == cell)) {
+                            moves.push({ item: cell, from: `r${r + 2}c${c - 1}`, to: `r${r + 2}c${c}` });
+                        } else if ((c < app.config.cols - 2) && (app.state.board[r + 2][c + 1] == cell)) {
+                            moves.push({ item: cell, from: `r${r + 2}c${c + 1}`, to: `r${r + 2}c${c}` });
+                        }
                     } else if ((r < app.config.rows - 3) && (c < app.config.cols -2) && (app.state.board[r + 1][c] == cell) && (app.state.board[r+2][c+1] == cell)) {
-                        moves.push({ from: `r${r-1}c${c+2}`, to: `r${r+2}c${c}` });
-                    } else if ((r < app.config.rows - 2) && (app.state.board[r][c + 1] == cell) && (app.state.board[r+1][c+2] == cell)) {
-                        moves.push({ from: `r${r+1}c${c+2}`, to: `r${r}c${c+2}` });
+                        moves.push({ item: cell, from: `r${r-1}c${c+2}`, to: `r${r+2}c${c}` });
+                    } else if ((r < app.config.rows - 2) && (app.state.board[r + 1][c] == cell) && (app.state.board[r + 2][c] == cell)) {
+                        moves.push({ item: cell, from: `r${r+1}c${c+2}`, to: `r${r}c${c}` });
+                    } else if ((c < app.config.cols - 2) && (r < app.config.rows - 3)) {
+                        if ((app.state.board[r + 1][c + 1] = cell) && (app.state.board[r + 2][c + 1] == cell)) {
+                            moves.push({ item: cell, from: `r${r}c${c}`, to: `r${r}c${c + 1}` });
+                        }
+                    } else if ((c > 0) && (r < app.config.rows - 3)) {
+                        if ((app.state.board[r + 1][c - 1] = cell) && (app.state.board[r + 2][c - 1] == cell)) {
+                            moves.push({ item: cell, from: `r${r}c${c}`, to: `r${r}c${c - 1}` });
+                        }
                     }
+
                 }
             }
             console.dir(moves);
@@ -609,6 +679,9 @@ console.dir(moves);
                     app.shiftDown(col);
                 }, cnt * 500);
             }
+        },
+        attack: function(type) {
+
         },
         dumpBoard: function() {
             let out = '';

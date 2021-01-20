@@ -223,12 +223,12 @@ section {
     transition: color 0.1s ease;
 }
 
-#countdown:after {
+#countdown::after {
     color: #fff;
     content: "☠";
     font-size: 72px;
     font-family: "Roboto Mono", monospace;
-    animation: counter 10s linear 1 3s;
+    animation: counter 10s linear infinite 3s;
     position: relative;
     z-index: 2001;
 }

@@ -44,6 +44,29 @@ section {
     margin-top: 3.5rem;
 }
 
+#opponent_inventory {
+    padding-top: 0px;
+    padding-bottom: .5rem;
+    margin-left: 1.5rem;
+    margin-top: 0px;
+    text-align:left;
+    display:inline-block;
+    width:8rem;
+}
+
+.opponent_invItem {
+    position: absolute;
+    background-clip: content-box;
+    width: 32px;
+    height: 32px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    padding-top: 32px;
+    box-sizing: content-box;
+    top: 0.2rem;
+    left: 0.1rem;
+}
+
 .invItem {
     position: absolute;
     background-clip: content-box;
@@ -70,11 +93,35 @@ section {
     left: 1rem;
 }
 
+.opponent_inventory span {
+    display: inline-block;
+    background-color: #090;
+    border-radius: 50%;
+    font-size: .8em;
+    font-family: "Liberation Mono", "Lucida Console", sans-serif;
+    border: 1px solid #fff;
+    width: 1rem;
+    height: 1rem;
+    position: relative;
+    left: 1rem;
+    text-align:center;
+}
+
 .inventory {
     position: relative;
     white-space: nowrap;
     width: 5rem;
     height: 5rem;
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: inline-block;
+}
+
+.opponent_inventory {
+    position: relative;
+    white-space: nowrap;
+    width: 2.5rem;
+    height: 2.5rem;
     background-repeat: no-repeat;
     background-size: contain;
     display: inline-block;
@@ -628,11 +675,30 @@ aside {
     font-size: 24px;
     margin-top: 10rem;
 }
+
 .attack {
     box-shadow: 3px 3px 3px #000a;
 }
+
 .attack:active {
     border-style: inset;
     top: 3px;
     background-color: #5aa5e4;
+}
+.netattack {
+    position:absolute;
+    top: 0px;
+    right: 0px;
+    bottom:0px;
+    left:0px;
+    height:100%;
+    width:100%;
+    opacity: .7;
+    background-image: url("img/fishingnet-big.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    transform-origin: 50% 50%;
+    transition: transform 200ms ease-out 500ms, margin 300ms ease-in 1000ms;
+    transform: scale(0);
+    border:0px;
 }

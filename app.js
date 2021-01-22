@@ -121,7 +121,7 @@
             obj.el.style.transform = "translate(" + Math.abs(obj.startX - e.layerX) + "px, " + Math.abs(obj.startY - e.layerY) + "px)";
         },
         handleMouseUp: function(e) {
-            $("#countdown::after").style.animationPlayState = "paused";
+            //$("#countdown::after").style.animationPlayState = "paused";
             let el = e.target;
             if (app.state.selected && (app.state.selected === el.id)) {
                 if ((Math.abs(app.state.lastClick.x - e.layerX) > 3) ||
@@ -149,7 +149,7 @@
                     });
                     //setTimeout(function() { app.checkMatches(); }, 500);
                     setTimeout(function() {
-                        if (!app.checkMatches(0, 0).length) {
+                        if (!app.checkMatches(0, false).length) {
                             console.log("No matches.  swapping back");
                             app.swapSpots({
                                 x: mx,
@@ -166,7 +166,7 @@
                         }
                     }, 300);
                     setTimeout(function() {
-                        app.autoMove();
+                        // app.autoMove();
                     }, 3000);
                 } else {
                     let sel = $(".selected");
@@ -267,7 +267,15 @@
             out += "<div id='opponent'><img src='img/anifish.gif' class='evilfish'>";
             out += "<div id='opponentProgress'></div>";
             out += "<span id='opponentScore'>0/0</span>";
+            out += "<div id='opponent_inventory'>";
+            app.config.items.forEach(function(item) {
+                if (item !== 'fish') {
+                    out += "<div class='opponent_inventory blank_" + item + "'><div id ='opponent_inv_img_" + item + "' class='opponent_invItem " + item + "'></div><span id='opponent_inv_" + item + "'>0</span></div>";
+                }
+            });
             out += "</div>";
+            out += "</div>";
+
 
             //out += '<div class="playerUp"><div class="continue">PLAYER <span id="playerUp">1</span></p></div><div class="wrapper"><div class="countdown"></div></div>';
 
@@ -285,10 +293,16 @@
             app.config.items.forEach((item) => {
                 if (item !== 'fish') {
                     let val = (app.state.inventory[0][item] >= 15) ? "max" : app.state.inventory[0][item];
+                    let oval = (app.state.inventory[1][item] >= 15) ? "max" : app.state.inventory[1][item];
 
                     $(`#inv_${item}`).innerHTML = val;
+                    $(`#opponent_inv_${item}`).innerHTML = oval;
+                    
                     let percent = app.state.inventory[0][item] / 15;
+                    let opercent = app.state.inventory[1][item] / 15;
+
                     $("#inv_img_" + item).style.paddingTop = 65 - (65 * percent) + "px";
+                    $("#opponent_inv_img_" + item).style.paddingTop = 32 - (32 * opercent) + "px";
                 }
             });
 
@@ -325,12 +339,13 @@
                         itemIdx = Math.floor(Math.random() * app.config.items.length);
                         item = app.config.items[itemIdx];
 
-                        if ((col > 0) && (app.state.board[row][col - 1] == item)) {
+/*                        if ((col > 0) && (app.state.board[row][col - 1] == item)) {
                             itemIdx = -1;
                         }
                         if ((row > 0) && (app.state.board[row - 1][col] == item)) {
                             itemIdx = -1;
                         }
+*/
                     }
                     let id = `r${row}c${col}`;
                     app.state.board[row][col] = item;
@@ -365,20 +380,22 @@
             console.log(`player ${app.state.currentPlayer}`);
             console.dir(moves);
             if (moves.length) {
-                let move;
+                let move = {count:0, item:""};
 
                 // Set priority to choose fish first (and then poles)
                 // otherwise, randomly pick 
                 // TODO: choose based on inventory needs
                 moves.forEach(function(item) {
-                    if (item.item == 'fish') {
+                    console.log("moves");
+                    // console.dir(item);
+                    if ((item.item == 'fish') && (move.count < item.count)) {
                         move = item;
-                    } else if (item.item == 'pole') {
+                    } else if (!move.item && (item.item == 'pole')) {
                         move = item;
                     }
                 });
 
-                if (!move) move = moves[app.rand(0, moves.length)];
+                if (!move.item) move = moves[app.rand(0, moves.length)];
 
                 coord.from = move.from.split(/\D/);
                 coord.from.shift();
@@ -398,7 +415,7 @@
                 });
 
                 setTimeout(function() {
-                    app.checkMatches(0, 1, false);
+                    app.checkMatches(0, false);
                     $(".moveto").classList.remove('moveto');
                     app.switchPlayer();
                 }, 500);
@@ -410,23 +427,83 @@
             console.log("Switching player to " + app.state.currentPlayer ^ 1);
             app.state.currentPlayer ^= 1;
             $("#playerUp").innerHTML = app.state.currentPlayer + 1;
-            $("#countdown::after").style.animationPlayState = "running";
+
+            if (app.state.currentPlayer === 1) {
+                setTimeout(function() { app.autoMove(); }, 2000);
+            }
+//            $("#countdown::after").style.animationPlayState = "running";
         },
         findMoves: function() {
             // check each row looking for patterns of either XX-X/X-XX or X-X and check rows before/after for matching item
             let moves = [];
+            const maxRows = app.config.rows, maxCols = app.config.cols;
 
             for (let r = 0; r < app.config.rows; r++) {
                 for (let c = 0; c < app.config.cols; c++) {
                     let cell = app.state.board[r][c];
-                    if (
+                    
+                    // - - ? -
+                    // X X - X
+                    // - - ? -
+                    //
+                    if ((c < maxCols - 4) &&
+                        (app.state.board[r][c + 1] == cell) &&
+                        (app.state.board[r][c + 3] == cell)) {
+                        if (app.state.board[r + 1][c + 2] == cell) {
+                            moves.push({
+                                item: cell,
+                                from: `r${r + 1}c${c + 2}`,
+                                to: `r${r}c${c + 2}`,
+                                count: 4
+                            });
+                        } else if ((r > 0) && (app.state.board[r - 1][c + 2] == cell)) {
+                            moves.push({
+                                item: cell,
+                                from: `r${r - 1}c${c + 2}`,
+                                to: `r${r}c${c + 2}`,
+                                count: 4
+                            });
+                        }
+                    
+                    // - ? - -
+                    // X - X X
+                    // - ? - -
+                    
+                    } else if (
+                        (c < maxCols - 4) && (r < maxRows - 2) && 
+                        (app.state.board[r][c + 2] == cell) &&
+                        (app.state.board[r][c + 3] == cell)) {
+                        if (app.state.board[r + 1][c + 1] == cell) {
+                            moves.push({
+                                item: cell,
+                                from: `r${r + 1}c${c + 1}`,
+                                to: `r${r}c${c + 1}`,
+                                cound: 4
+                            });
+                        } else if ((r > 0) && (app.state.board[r - 1][c + 1] == cell)) {
+                            moves.push({
+                                item: cell,
+                                from: `r${r - 1}c${c + 1}`,
+                                to: `r${r}c${c + 1}`,
+                                cound: 4
+                            });
+                        }
+                    // - - - -
+                    // X X - X
+                    // - - - -
+                    } else if (
+                        (c < maxCols - 4) && 
                         (app.state.board[r][c + 1] == cell) && 
                         (app.state.board[r][c + 3] == cell)) {
                             moves.push({
                                 item: cell,
                                 from: `r${r}c${c+3}`,
-                                to: `r${r}c${c+2}`
+                                to: `r${r}c${c+2}`,
+                                cound: 4
                             });
+                    // - - - -
+                    // X - X X
+                    // - - - -
                     } else if (
                         (c < app.config.cols - 4) && 
                         (app.state.board[r][c + 2] == cell) && 
@@ -434,8 +511,12 @@
                             moves.push({
                                 item: cell,
                                 from: `r${r}c${c}`,
-                                to: `r${r}c${c+1}`
+                                to: `r${r}c${c+1}`,
+                                cound: 4
                             });
+                    // - - - -
+                    // X - X -
+                    // - X - -
                     } else if (
                         (c < app.config.cols - 3) && 
                         (r < app.config.rows - 2) && 
@@ -444,8 +525,12 @@
                             moves.push({
                                 item: cell,
                                 from: `r${r+1}c${c+1}`,
-                                to: `r${r}c${c+1}`
+                                to: `r${r}c${c+1}`,
+                                count: 3
                             });
+                    // - X - -
+                    // X - X -
+                    // - - - -
                     } else if (
                         (r > 0) && 
                         (app.state.board[r][c + 2] == cell) && 
@@ -453,17 +538,25 @@
                             moves.push({
                                 item: cell,
                                 from: `r${r-1}c${c+1}`,
-                                to: `r${r}c${c+1}`
+                                to: `r${r}c${c+1}`,
+                                count: 3
                             });
+                    // - - X -
+                    // X X - -
+                    // - - - -
                     } else if (
-                        (r > 0) && 
+                        ((r > 0) && (c < app.config.cols - 3)) && 
                         (app.state.board[r][c + 1] == cell) && 
                         (app.state.board[r - 1][c + 2] == cell)) {
                             moves.push({
                                 item: cell,
                                 from: `r${r-1}c${c+2}`,
-                                to: `r${r}c${c+2}`
+                                to: `r${r}c${c+2}`,
+                                count: 3
                             });
+                    // - - - -
+                    // X X - -
+                    // - - X -
                     } else if (
                         (r < app.config.rows - 2) && 
                         (app.state.board[r][c + 1] == cell) && 
@@ -471,7 +564,8 @@
                             moves.push({
                                 item: cell,
                                 from: `r${r+1}c${c+2}`,
-                                to: `r${r}c${c+2}`
+                                to: `r${r}c${c+2}`,
+                                count: 3
                             });
                     }
                 }
@@ -488,8 +582,6 @@
                   X - | - X | X - | - X | - X | X -
 
             */
-            const maxRows = app.config.rows,
-                maxCols = app.config.cols;
             for (let c = 0; c < app.config.cols; c++) {
                 for (let r = 0; r < app.config.rows; r++) {
                     let cell = app.state.board[r][c];
@@ -505,13 +597,15 @@
                             moves.push({
                                 item: cell,
                                 from: `r${r + 2}c${c + 1}`,
-                                to: `r${r + 2}c${c}`
+                                to: `r${r + 2}c${c}`,
+                                count: 4
                             });
                         } else if (app.state.board[r + 2][c - 1] == cell) {
                             moves.push({
                                 item: cell,
                                 from: `r${r + 2}c${c - 1}`,
-                                to: `r${r + 2}c${c}`
+                                to: `r${r + 2}c${c}`,
+                                count: 4
                             });
                         }
                         // -X-
@@ -525,13 +619,15 @@
                             moves.push({
                                 item: cell,
                                 from: `r${r + 1}c${c + 1}`,
-                                to: `r${r + 1}c${c}`
+                                to: `r${r + 1}c${c}`,
+                                count: 4
                             });
                         } else if (app.state.board[r + 1][c - 1] == cell) {
                             moves.push({
                                 item: cell,
                                 from: `r${r + 1}c${c - 1}`,
-                                to: `r${r + 1}c${c}`
+                                to: `r${r + 1}c${c}`,
+                                count: 4
                             });
                         }
                         // -X-
@@ -545,7 +641,8 @@
                             moves.push({
                                 item: cell,
                                 from: `r${r + 1}c${c - 1}`,
-                                to: `r${r + 1}c${c}`
+                                to: `r${r + 1}c${c}`,
+                                count: 3
                             });
                         } else
                         if ((c < maxCols - 2) &&
@@ -553,7 +650,8 @@
                             moves.push({
                                 item: cell,
                                 from: `r${r + 1}c${c + 1}`,
-                                to: `r${r + 1}c${c}`
+                                to: `r${r + 1}c${c}`,
+                                count: 3
                             });
                         }
                         // -X-
@@ -566,14 +664,16 @@
                             moves.push({
                                 item: cell,
                                 from: `r${r + 2}c${c - 1}`,
-                                to: `r${r + 2}c${c}`
+                                to: `r${r + 2}c${c}`,
+                                count: 3
                             });
                         } else if ((c < maxCols - 2) &&
                             (app.state.board[r + 2][c + 1] == cell)) {
                             moves.push({
                                 item: cell,
                                 from: `r${r + 2}c${c + 1}`,
-                                to: `r${r + 2}c${c}`
+                                to: `r${r + 2}c${c}`,
+                                count: 3
                             });
                         }
                         // ?-?
@@ -586,14 +686,16 @@
                             moves.push({
                                 item: cell,
                                 from: `r${r}c${c - 1}`,
-                                to: `r${r}c${c}`
+                                to: `r${r}c${c}`,
+                                count: 3
                             });
                         } else if ((c < maxCols - 2) &&
                             (app.state.board[r][c + 1] == app.state.board[r + 1][c])) {
                             moves.push({
                                 item: cell,
                                 from: `r${r}c${c + 1}`,
-                                to: `r${r}c${c}`
+                                to: `r${r}c${c}`,
+                                count: 3
                             });
                         }
                     }
@@ -601,7 +703,7 @@
 
                 }
             }
-            // console.dir(moves);
+            //console.dir(moves);
             return moves;
         },
         checkMatches: function(cnt, noscore = false) {
@@ -611,9 +713,10 @@
 
             matches = app.checkCols();
             matches = matches.concat(app.checkRows());
+            console.log("checkMatches");
             console.dir(matches);
             if (matches.length) {
-                app.clearMatches(matches, true);
+                app.clearMatches(matches, false);
 
                 setTimeout(function() {
                     app.checkMatches(cnt, noscore);
@@ -644,7 +747,7 @@
                             console.log("Got column of " + cnt + " " + cur);
                             clr.pop();
                             app.state.clearItems.push(clr);
-                            app.clearCells(clr);
+//                            app.clearCells(clr);
                             matches.push(clr);
                         }
                         cur = app.state.board[r][c];
@@ -659,7 +762,7 @@
                 }
                 if (clr.length > 2) {
                     console.log("Got column of " + clr.length + " " + cur);
-                    app.clearCells(clr);
+ //                   app.clearCells(clr);
                     matches.push(clr);
                 }
             }
@@ -686,7 +789,7 @@
                             console.log("Got row of " + cnt + " " + cur);
                             clr.pop();
                             app.state.clearItems.push(clr);
-                            app.clearCells(clr);
+//                            app.clearCells(clr);
                             matches.push(clr);
                         }
                         cur = app.state.board[r][c];
@@ -701,7 +804,7 @@
                 }
                 if (clr.length > 2) {
                     console.log("Got row of " + clr.length + " " + cur);
-                    app.clearCells(clr);
+ //                   app.clearCells(clr);
                     matches.push(clr);
                 }
 
@@ -718,6 +821,8 @@
             app.state.selected = "";
             for (let i = 0; i < matches.length; i++) {
                 let cells = matches[i];
+                app.clearCells(cells);
+                /*
                 for (let j = 0; j < cells.length; j++) {
                     let cell = cells[j];
                     let item = app.state.board[cell.row][cell.col];
@@ -732,8 +837,6 @@
                     app.state.board[cell.row][cell.col] = "";
 
                     let el = $(`#item_r${cell.row}c${cell.col}`);
-                    //                let el2 = el.cloneNode(true);
-                    //                $("#board").appendChild(el2);
 
                     if (el) {
                         setTimeout(function() {
@@ -743,19 +846,15 @@
                                     el: el,
                                     classname: cell.val
                                 });
-                                //el.classList.remove(cell.val);
-                                //el.classList.add('blank');
                             }
                         }, j * 10);
                     }
                 }
+                */
             }
-            setTimeout(function() {
-                app.dropCells();
-            }, 10);
+            // setTimeout(function() { app.dropCells(); }, 10);
         },
         clearCells: function(cells, noscore = false) {
-
             const player = app.state.currentPlayer;
             let selel = $$(".selected");
 
@@ -777,8 +876,6 @@
                 app.state.board[cell.row][cell.col] = "";
 
                 let el = $(`#item_r${cell.row}c${cell.col}`);
-                //                let el2 = el.cloneNode(true);
-                //                $("#board").appendChild(el2);
 
                 if (el) {
                     setTimeout(function() {
@@ -788,15 +885,13 @@
                                 el: el,
                                 classname: cell.val
                             });
-                            //el.classList.remove(cell.val);
-                            //el.classList.add('blank');
                         }
                     }, j * 10);
                 }
             }
             setTimeout(function() {
                 app.dropCells();
-            }, 10);
+            }, 100);
         },
         dropCells: function() {
             for (let c = 0; c < app.config.cols; c++) {
@@ -868,7 +963,54 @@
             }
         },
         attack: function(type) {
+            console.log("attack " + type);
 
+            switch(type) {
+
+                case "net":
+                    app.netAttack();
+                    break;
+                case "snatch":
+                    app.snatchAttack();
+                    break;
+                case "catch":
+                    app.catchAttack();
+                    break;
+                case "attack":
+                    app.attackAttack();
+                    break;
+            }
+        },
+        netAttack: function() {
+            const net = document.createElement("div");
+            net.classList.add("netattack");
+            let stage = 0;
+            net.addEventListener("transitionend", function(e) {
+                ++stage;
+                console.log("transition completed:" + stage);
+//                net.style.transitionDuration = "800ms";
+                net.style.transitiondelay = "1000ms";
+                net.style.transform = "scale(0)";
+            });
+            $("#board").appendChild(net);
+            setTimeout(function() { net.style.transform = "scale(1.1)"; }, 100);
+            
+            let found = [], fishCount = 0;
+
+            for (let r=0; r < app.config.rows; r++) {
+                for (let c=0; c < app.config.cols; c++) {
+                    if (app.state.board[r][c] == 'fish') {
+                        found.push({row: r, col: c, el: $(`#item_r${r}c${c}`) });
+                        fishCount++;
+                        app.state.board[r][c] = '';
+                    }
+                }
+            }
+            app.state.inventory[app.state.currentPlayer]['fish'] += fishCount;
+            //app.dropCells();
+            setTimeout(function() { app.dropCells(); app.switchPlayer(); }, 1000);
+            // loop through and find all fish, remove them from board, yadda yadda
+            //...
         },
         dumpBoard: function() {
             let out = '';

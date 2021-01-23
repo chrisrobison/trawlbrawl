@@ -339,13 +339,13 @@
                         itemIdx = Math.floor(Math.random() * app.config.items.length);
                         item = app.config.items[itemIdx];
 
-/*                        if ((col > 0) && (app.state.board[row][col - 1] == item)) {
+                        if ((col > 0) && (app.state.board[row][col - 1] == item)) {
                             itemIdx = -1;
                         }
                         if ((row > 0) && (app.state.board[row - 1][col] == item)) {
                             itemIdx = -1;
                         }
-*/
+
                     }
                     let id = `r${row}c${col}`;
                     app.state.board[row][col] = item;

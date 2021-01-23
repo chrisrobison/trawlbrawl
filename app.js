@@ -449,7 +449,7 @@
                     if ((c < maxCols - 4) &&
                         (app.state.board[r][c + 1] == cell) &&
                         (app.state.board[r][c + 3] == cell)) {
-                        if (app.state.board[r + 1][c + 2] == cell) {
+                        if ((r < maxRows - 2) && (app.state.board[r + 1][c + 2] == cell)) {
                             moves.push({
                                 item: cell,
                                 from: `r${r + 1}c${c + 2}`,

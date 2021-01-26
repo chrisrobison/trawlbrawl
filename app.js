@@ -39,6 +39,7 @@
 
                 app.attack(attack);
             });
+            app.startTimer();
         },
         state: {
             loaded: false,
@@ -244,7 +245,7 @@
                 out += "</div>";
             }
             out += "</div>";
-
+            out += "<div class='arrow'></div>";
             $("nav").innerHTML = out;
 
             out = "";
@@ -280,7 +281,7 @@
             //out += '<div class="playerUp"><div class="continue">PLAYER <span id="playerUp">1</span></p></div><div class="wrapper"><div class="countdown"></div></div>';
 
             out += "<div class='playerUp'>PLAYER <span id='playerUp'>1</span> UP</div><div id='countdown'></div>";
-
+            out += "<div class='arrow'></div>";
             $("aside").innerHTML = out;
 
         },
@@ -427,11 +428,28 @@
             console.log("Switching player to " + app.state.currentPlayer ^ 1);
             app.state.currentPlayer ^= 1;
             $("#playerUp").innerHTML = app.state.currentPlayer + 1;
+            $("main").className = "player" + app.state.currentPlayer;
 
             if (app.state.currentPlayer === 1) {
-                setTimeout(function() { app.autoMove(); }, 2000);
+                setTimeout(function() { app.autoMove(); }, (2000 + (Math.floor(Math.random() * 4000))));
             }
+            app.startTimer();
 //            $("#countdown::after").style.animationPlayState = "running";
+        },
+        doTimer: function() {
+            app.state.timer--;
+            $("#countdown").innerHTML = app.state.timer;
+            if (app.state.timer > 0) {
+                app.state.timeout = setTimeout(function() { app.doTimer(); }, 1000);
+            } else {
+                app.switchPlayer();
+            }
+        },
+        startTimer: function() {
+            clearTimeout(app.state.timeout);
+            app.state.timer = 10;
+            $("#countdown").innerHTML = app.state.timer;
+            setTimeout(function() { app.doTimer(); }, 1000);
         },
         findMoves: function() {
             // check each row looking for patterns of either XX-X/X-XX or X-X and check rows before/after for matching item

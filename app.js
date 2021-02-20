@@ -278,7 +278,7 @@
             out += "</div>";
 
 
-            //out += '<div class="playerUp"><div class="continue">PLAYER <span id="playerUp">1</span></p></div><div class="wrapper"><div class="countdown"></div></div>';
+//            out += '<div class="playerUp"><div class="continue">PLAYER <span id="playerUp">1</span></p></div><div class="wrapper"><div id="countdown" class="countdown"></div></div>';
 
             out += "<div class='playerUp'>PLAYER <span id='playerUp'>1</span> UP</div><div id='countdown'></div>";
             out += "<div class='arrow'></div>";
@@ -286,9 +286,9 @@
 
         },
         updateScoreboard: function(player = 0) {
-            $("#opponentScore").innerHTML = app.state.inventory[1].fish + ' / ' + app.config.goal;
             $("#fishcount").innerHTML = app.state.inventory[0].fish + ' / ' + app.config.goal;
             $("#fishProgress").style.width = Math.floor((app.state.inventory[0].fish / app.config.goal) * 100) + '%';
+            $("#opponentScore").innerHTML = app.state.inventory[1].fish + ' / ' + app.config.goal;
             $("#opponentProgress").style.width = Math.floor((app.state.inventory[1].fish / app.config.goal) * 100) + '%';
 
             app.config.items.forEach((item) => {
@@ -312,7 +312,7 @@
                     let attack = app.config.attacks[i];
 
                     for (const [key, val] of Object.entries(attack.required)) {
-                        let newval = val - app.state.inventory[player][key];
+                        let newval = val - app.state.inventory[0][key];
                         let pid = attack.id + '_' + key;
                         if (newval <= 0) {
                             $(`#${attack.id}_${key} .attackVal`).classList.add('complete');
@@ -417,6 +417,10 @@
 
                 setTimeout(function() {
                     app.checkMatches(0, false);
+                   /* while (matches = app.checkMatches(0, false)) {
+                        app.updateScoreboard();
+                    }
+                    */
                     $(".moveto").classList.remove('moveto');
                     app.switchPlayer();
                 }, 500);
@@ -481,6 +485,13 @@
                                 to: `r${r}c${c + 2}`,
                                 count: 4
                             });
+                        } else {
+                            moves.push({
+                                item: cell,
+                                from: `r${r}c${c + 3}`,
+                                to: `r${r}c${c + 2}`,
+                                count: 3
+                            });
                         }
                     
                     // - ? - -
@@ -496,14 +507,21 @@
                                 item: cell,
                                 from: `r${r + 1}c${c + 1}`,
                                 to: `r${r}c${c + 1}`,
-                                cound: 4
+                                count: 4
                             });
                         } else if ((r > 0) && (app.state.board[r - 1][c + 1] == cell)) {
                             moves.push({
                                 item: cell,
                                 from: `r${r - 1}c${c + 1}`,
                                 to: `r${r}c${c + 1}`,
-                                cound: 4
+                                count: 4
+                            });
+                        } else {
+                            moves.push({
+                                item: cell,
+                                from: `r${r}c${c}`,
+                                to: `r${r}c${c + 1}`,
+                                count: 3
                             });
                         }
                     // - - - -
@@ -517,7 +535,7 @@
                                 item: cell,
                                 from: `r${r}c${c+3}`,
                                 to: `r${r}c${c+2}`,
-                                cound: 4
+                                count: 4
                             });
                     // - - - -
                     // X - X X
@@ -530,7 +548,7 @@
                                 item: cell,
                                 from: `r${r}c${c}`,
                                 to: `r${r}c${c+1}`,
-                                cound: 4
+                                count: 4
                             });
                     // - - - -
                     // X - X -
@@ -625,6 +643,13 @@
                                 to: `r${r + 2}c${c}`,
                                 count: 4
                             });
+                        } else {
+                            moves.push({
+                                item: cell,
+                                from: `r${r + 3}c${c}`,
+                                to: `r${r + 2}c${c}`,
+                                count: 3
+                            });
                         }
                         // -X-
                         // ?-?
@@ -646,6 +671,13 @@
                                 from: `r${r + 1}c${c - 1}`,
                                 to: `r${r + 1}c${c}`,
                                 count: 4
+                            });
+                        } else {
+                            moves.push({
+                                item:cell,
+                                from: `r${r}c${c}`,
+                                to: `r${r + 1}c${c}`,
+                                count: 3
                             });
                         }
                         // -X-
@@ -737,9 +769,8 @@
                 app.clearMatches(matches, false);
 
                 setTimeout(function() {
-                    app.checkMatches(cnt, noscore);
+                    app.checkMatches(cnt, noscore, app.state.currentPlayer);
                 }, 500);
-
                 app.updateScoreboard(app.state.currentPlayer);
             }
             return matches;

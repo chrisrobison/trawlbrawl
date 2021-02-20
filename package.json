@@ -1,0 +1,27 @@
+{
+  "name": "fishingduels",
+  "version": "1.0.0",
+  "description": "Head-to-head match-3 game",
+  "main": "app.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrisrobison/fishingduels.git"
+  },
+  "keywords": [
+    "head-to-head",
+    "match-3",
+    "arena"
+  ],
+  "author": "Christopher D. Robison",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chrisrobison/fishingduels/issues"
+  },
+  "homepage": "https://github.com/chrisrobison/fishingduels#readme"
+}
